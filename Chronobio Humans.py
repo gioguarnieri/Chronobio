@@ -2,12 +2,11 @@
 """
 Created on Wed Feb 12 17:30:20 2020
 
-@author: gio-x
+@author: Giovanni G Soares
 """
 import sys
-from PyQt5.QtWidgets import QWidget, QInputDialog, QLineEdit, QFileDialog, \
-    QLabel, QApplication, QPushButton, \
-    QMessageBox
+from PyQt5.QtWidgets import QWidget, QInputDialog, QFileDialog, \
+    QLabel, QApplication, QMessageBox
 from PyQt5.QtGui import QPixmap
 import csv
 import statistics
@@ -47,7 +46,7 @@ class App(QWidget):
         # Naming the output compiled data
         namefile = "HumansCompiledColumn{}".format(self.column)
         self.writeFile(ldado, fullfile, header, namefile)
-        # Making the histogram with the data, 
+        # Making the histogram with the data
         # getting a suggestion to threshold values
         self.vlThreshmax, self.vlThreshmin = self.mkHisto(self.column, ldado)
         # Plotting the original data, without modification
@@ -64,8 +63,9 @@ class App(QWidget):
             # getting the values to threshold
             # self.vlThreshmin, self.vlThreshmax=self.getDouble()
             # applying the threshold
-            ldata, lhora, ldado = self.applyThresh(ldata, lhora, ldado,
-                                                   self.vlThreshmin, self.vlThreshmax)
+            ldata, lhora, ldado = self.applyThresh(ldata, lhora,
+                                                   ldado, self.vlThreshmin,
+                                                   self.vlThreshmax)
             # Making another histogram to show the user
             self.mkHisto(str(self.column) + "Thresh", ldado)
             image = '{}histo.png'.format("Thresh")
@@ -229,24 +229,6 @@ class App(QWidget):
                 newldata.append(ldata[i])
         return newldata, newlhora, newldado
 
-    def Convergence(self, ldata, lhora, ldado):
-        oldsd = 0
-        sdev = 1
-        while (abs(oldsd - sdev) > 0.01):
-            oldsd = sdev
-            lista = []
-            for i in ldado:
-                if str(i) != "nan":
-                    lista.append(i)
-            mean = sum(lista) / len(lista)
-            sdev = statistics.stdev(lista)
-            outliermenos = mean - 2 * sdev
-            outliermais = mean + 2 * sdev
-            ldata, lhora, ldado = self.applyThresh(ldata, lhora, ldado,
-                                                   outliermenos, outliermais)
-            print(sdev)
-        return ldata, lhora, ldado
-
     # smoothing the data with weighted values
     def suaviza(self, ldado, w1, w2, w3):
         newldado = []
@@ -276,8 +258,9 @@ class App(QWidget):
         for i in ldata:
             if i not in keys[0]:
                 keys[0].append(i)
-                # it counts how many times a certain date appears in the list, knowing how many data
-                # there is in it so we can show the xtics with an accurate spacing
+                # it counts how many times a certain date appears in the list,
+                # knowing how many data there is in it so we can
+                # show the xtics with an accurate spacing
                 keys[1].append(ldata.count(keys[0][-1]))
 
         eixoX = np.zeros(len(keys[1]))
